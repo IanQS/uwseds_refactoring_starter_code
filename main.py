@@ -3,6 +3,7 @@ from random import randrange, seed
 
 seed(42)
 NUM_QUESTIONS = 50
+COINS_TO_WIN = 6
 
 
 class GameException(Exception):
@@ -140,12 +141,11 @@ class Game:
         self.in_penalty_box[self.current_player] = True
 
         self.current_player += 1
-        if self.current_player == len(self.players):
-            self.current_player = 0
+        self.current_player = self.current_player % self.how_many_players
         return True
 
     def _did_player_win(self):
-        return not (self.purses[self.current_player] == 6)
+        return self.purses[self.current_player] != COINS_TO_WIN
 
 
 if __name__ == "__main__":
