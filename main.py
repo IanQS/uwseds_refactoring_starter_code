@@ -5,14 +5,18 @@ seed(42)
 NUM_QUESTIONS = 50
 
 
+class GameException(Exception):
+    pass
+
+
 class Game:
     def __init__(self, num_questions: int):
         self.players: list[str] = []
-        self.purses = []
-        self.in_penalty_box = []
-        self.current_player = 0
-        self.is_getting_out_of_penalty_box = False
-        self.places = [0] * 6
+        self.purses: list[int] = []
+        self.in_penalty_box: list[bool] = []
+        self.current_player: int = 0
+        self.is_getting_out_of_penalty_box: bool = False
+        self.places: list[int] = []
 
         self._initialize_questions(num_questions)
 
@@ -33,11 +37,10 @@ class Game:
         return self.how_many_players >= 2
 
     def add(self, player_name: str):
-        self.places[self.how_many_players] = 0
-
         self.players.append(player_name)
         self.purses.append(0)
         self.in_penalty_box.append(False)
+        self.places.append(0)
 
         print(player_name + " was added")
         print("They are player number %s" % len(self.players))
@@ -82,25 +85,16 @@ class Game:
 
     @property
     def _current_category(self):
-        if self.places[self.current_player] == 0:
+        if self.places[self.current_player] in [0, 4, 8]:
             return "Pop"
-        if self.places[self.current_player] == 4:
-            return "Pop"
-        if self.places[self.current_player] == 8:
-            return "Pop"
-        if self.places[self.current_player] == 1:
+        if self.places[self.current_player] in [1, 5, 9]:
             return "Science"
-        if self.places[self.current_player] == 5:
-            return "Science"
-        if self.places[self.current_player] == 9:
-            return "Science"
-        if self.places[self.current_player] == 2:
+        if self.places[self.current_player] in [2, 6, 10]:
             return "Sports"
-        if self.places[self.current_player] == 6:
-            return "Sports"
-        if self.places[self.current_player] == 10:
-            return "Sports"
-        return "Rock"
+        if self.places[self.current_player] in [3, 7, 11]:
+            return "Rock"  # 3, 7, 11
+        err_string = f"Player: {self.current_player} ({self.players[self.current_player]}) in invalid place: {self.places[self.current_player]}"
+        raise GameException(err_string)
 
     def was_correctly_answered(self):
         if self.in_penalty_box[self.current_player]:
@@ -162,6 +156,10 @@ if __name__ == "__main__":
     game.add("Chet")
     game.add("Pat")
     game.add("Sue")
+
+    if not game.is_playable():
+        print("Too few players!!!")
+        exit(1)
 
     while True:
         game.roll(randrange(5) + 1)
