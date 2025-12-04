@@ -1,39 +1,43 @@
 #!/usr/bin/env python
-from random import randrange
+from random import randrange, seed
+
+seed(42)
+NUM_QUESTIONS = 50
 
 
 class Game:
-    def __init__(self):
-        self.players = []
+    def __init__(self, num_questions: int):
+        self.players: list[str] = []
+        self.purses = []
+        self.in_penalty_box = []
+        self.current_player = 0
+        self.is_getting_out_of_penalty_box = False
         self.places = [0] * 6
-        self.purses = [0] * 6
-        self.in_penalty_box = [0] * 6
+
+        self._initialize_questions(num_questions)
+
+    def _initialize_questions(self, num_questions: int):
 
         self.pop_questions = []
         self.science_questions = []
         self.sports_questions = []
         self.rock_questions = []
 
-        self.current_player = 0
-        self.is_getting_out_of_penalty_box = False
-
-        for i in range(50):
+        for i in range(num_questions):
             self.pop_questions.append("Pop Question %s" % i)
             self.science_questions.append("Science Question %s" % i)
             self.sports_questions.append("Sports Question %s" % i)
-            self.rock_questions.append(self.create_rock_question(i))
-
-    def create_rock_question(self, index):
-        return "Rock Question %s" % index
+            self.rock_questions.append("Rock Question %s" % i)
 
     def is_playable(self):
         return self.how_many_players >= 2
 
-    def add(self, player_name):
-        self.players.append(player_name)
+    def add(self, player_name: str):
         self.places[self.how_many_players] = 0
-        self.purses[self.how_many_players] = 0
-        self.in_penalty_box[self.how_many_players] = False
+
+        self.players.append(player_name)
+        self.purses.append(0)
+        self.in_penalty_box.append(False)
 
         print(player_name + " was added")
         print("They are player number %s" % len(self.players))
@@ -44,33 +48,27 @@ class Game:
     def how_many_players(self):
         return len(self.players)
 
-    def roll(self, roll):
+    def roll(self, roll: int):
         print("%s is the current player" % self.players[self.current_player])
         print("They have rolled a %s" % roll)
 
+        if self.in_penalty_box[self.current_player] and roll % 2 == 0:
+            print("%s is not getting out of the penalty box" % self.players[self.current_player])
+            self.is_getting_out_of_penalty_box = False
+            return
+
         if self.in_penalty_box[self.current_player]:
-            if roll % 2 != 0:
-                self.is_getting_out_of_penalty_box = True
+            self.is_getting_out_of_penalty_box = True
 
-                print("%s is getting out of the penalty box" % self.players[self.current_player])
-                self.places[self.current_player] = self.places[self.current_player] + roll
-                if self.places[self.current_player] > 11:
-                    self.places[self.current_player] = self.places[self.current_player] - 12
+            print("%s is getting out of the penalty box" % self.players[self.current_player])
 
-                print(self.players[self.current_player] + "'s new location is " + str(self.places[self.current_player]))
-                print("The category is %s" % self._current_category)
-                self._ask_question()
-            else:
-                print("%s is not getting out of the penalty box" % self.players[self.current_player])
-                self.is_getting_out_of_penalty_box = False
-        else:
-            self.places[self.current_player] = self.places[self.current_player] + roll
-            if self.places[self.current_player] > 11:
-                self.places[self.current_player] = self.places[self.current_player] - 12
+        self.places[self.current_player] = self.places[self.current_player] + roll
+        if self.places[self.current_player] > 11:
+            self.places[self.current_player] = self.places[self.current_player] - 12
 
-            print(self.players[self.current_player] + "'s new location is " + str(self.places[self.current_player]))
-            print("The category is %s" % self._current_category)
-            self._ask_question()
+        print(self.players[self.current_player] + "'s new location is " + str(self.places[self.current_player]))
+        print("The category is %s" % self._current_category)
+        self._ask_question()
 
     def _ask_question(self):
         if self._current_category == "Pop":
@@ -159,7 +157,7 @@ class Game:
 if __name__ == "__main__":
     not_a_winner = False
 
-    game = Game()
+    game = Game(NUM_QUESTIONS)
 
     game.add("Chet")
     game.add("Pat")
