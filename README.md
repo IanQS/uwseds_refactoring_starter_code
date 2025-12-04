@@ -8,4 +8,6 @@ As a new developer, it can be useful to work through existing code with someone 
 
 Other than converting the original [Python 2 code from caradojo/trivia](https://github.com/caradojo/trivia/blob/master/python/trivia.py) to [Python 3](./main.py) using [2to3](https://docs.python.org/3.12/library/2to3.html), I have no prior experience with this codebase and have not examined it before.
 
+The accompanying video can be found: [Guided refactoring tour](https://www.youtube.com/watch?v=a1ZhKhtrQfo)
+
 **Note:** The final solution will be in the `refactored` branch
