@@ -4,6 +4,9 @@ from random import randrange, seed
 seed(42)
 NUM_QUESTIONS = 50
 COINS_TO_WIN = 6
+DICE_MIN = 1
+DICE_MAX = 6
+FAILURE_CONDITION = 7
 
 
 class GameException(Exception):
@@ -98,42 +101,22 @@ class Game:
         raise GameException(err_string)
 
     def was_correctly_answered(self):
-        if self.in_penalty_box[self.current_player]:
-            if self.is_getting_out_of_penalty_box:
-                print("Answer was correct!!!!")
-                self.purses[self.current_player] += 1
-                print(
-                    self.players[self.current_player]
-                    + " now has "
-                    + str(self.purses[self.current_player])
-                    + " Gold Coins."
-                )
-
-                winner = self._did_player_win()
-                self.current_player += 1
-                if self.current_player == len(self.players):
-                    self.current_player = 0
-
-                return winner
-            else:
-                self.current_player += 1
-                if self.current_player == len(self.players):
-                    self.current_player = 0
-                return True
-
-        else:
-            print("Answer was corrent!!!!")
-            self.purses[self.current_player] += 1
-            print(
-                self.players[self.current_player] + " now has " + str(self.purses[self.current_player]) + " Gold Coins."
-            )
-
-            winner = self._did_player_win()
+        if self.in_penalty_box[self.current_player] and not self.is_getting_out_of_penalty_box:
             self.current_player += 1
             if self.current_player == len(self.players):
                 self.current_player = 0
+            return True
 
-            return winner
+        print("Answer was correct!!!!")
+        self.purses[self.current_player] += 1
+        print(self.players[self.current_player] + " now has " + str(self.purses[self.current_player]) + " Gold Coins.")
+
+        winner = self._did_player_win()
+        self.current_player += 1
+        if self.current_player == len(self.players):
+            self.current_player = 0
+
+        return winner
 
     def wrong_answer(self):
         print("Question was incorrectly answered")
@@ -162,9 +145,10 @@ if __name__ == "__main__":
         exit(1)
 
     while True:
-        game.roll(randrange(5) + 1)
+        game.roll(randrange(DICE_MIN, DICE_MAX))
 
-        if randrange(9) == 7:
+        possible_outcome = randrange(9)
+        if possible_outcome == FAILURE_CONDITION:
             not_a_winner = game.wrong_answer()
         else:
             not_a_winner = game.was_correctly_answered()
